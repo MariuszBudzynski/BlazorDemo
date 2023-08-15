@@ -1,0 +1,100 @@
+﻿@page "/Employees/add"
+@using AutoMapper;
+@inject IEmployeeRepository repository
+@inject IModdelMapper modellMapper
+
+<PageTitle>Add Employee</PageTitle>
+
+<h1>Add Employee</h1>
+
+@*passing values from parent to child*@
+<EmployeeForm
+	Employee="@Employee"
+	TitleList="@TitleList"
+	TitleOfCourtesyList="@TitleOfCourtesyList"
+	IsBusy="@IsBusy"
+	OnSubmit="@HandleValidSubmit"
+	IsEdit="false"/>
+
+@if (SuccessMessage is not null)
+{
+	<br />
+	<fiv class="alert alert-success">@SuccessMessage</fiv>
+}
+@if (ErrorMessage is not null)
+{
+	<br />
+	<fiv class="alert alert-danger">@ErrorMessage</fiv>
+}
+
+@code {
+
+	public EmployeeModel? Employee { get; set; }
+	private bool IsBusy { get; set; } = false;
+	private List<string>? TitleOfCourtesyList { get; set; }
+	private List<string>? TitleList { get; set; }
+	private string? SuccessMessage { get; set; }
+	private string? ErrorMessage { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		Employee = new();
+
+		var employeeList = await Task.FromResult(repository.GetAllEmployees());
+		TitleOfCourtesyList = await Task.FromResult(repository.GetDistinctTitles());
+		TitleList = await Task.FromResult(repository.GetDistinctTitlesOfCourtesy());
+	}
+
+	//method passed to delegate on child
+	private async Task HandleValidSubmit(bool isValid)
+	{
+		if (isValid)
+		{
+			await ValidSubmit();
+		}
+		else
+		{
+			await InalidSubmit();
+		}
+	}
+
+	private async Task ValidSubmit()
+	{
+		if (IsBusy)
+		{
+			return;
+		}
+
+		IsBusy = true;
+
+		var mappedEmployee = await Task.FromResult(modellMapper.ModelEEtoEmployee(Employee));
+
+		if (mappedEmployee is not null)
+		{
+			try
+			{
+				await repository.SaveEmployee(mappedEmployee);
+				SuccessMessage = "Data saved";
+				ErrorMessage = null;
+			}
+			catch (Exception e)
+			{
+				SuccessMessage = null;
+				ErrorMessage = $"Error: {e.Message}";
+			}
+			finally
+			{
+				IsBusy = false;
+			}
+			Employee = new();
+
+		}
+
+	}
+
+	private async Task InalidSubmit()
+	{
+		SuccessMessage = null;
+		ErrorMessage = null;
+	}
+}

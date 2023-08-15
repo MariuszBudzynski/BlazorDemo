@@ -1,0 +1,92 @@
+﻿
+@inject IEmployeeRepository repository
+@inject NavigationManager navigationManager
+@inject IJSRuntime JavaScript
+
+<ul class="pagination m-3">
+	<li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+		<a class="page-link" href="/Employees/list/@(CurrentPage - 1)">Previous</a>
+	</li>
+
+	@for (double i = 1; i <= TotalPages; i++)
+	{
+		<li class="page-item @(CurrentPage == i ? "active" : "")">
+			<a class="page-link" href="/Employees/list/@i">@i</a>
+		</li>
+	}
+
+	<li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+		<a class="page-link" href="/Employees/list/@(CurrentPage + 1)">Next</a>
+	</li>
+</ul>
+
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th>FirstName</th>
+			<th>LastName</th>
+			<th>Title</th>
+			<th>TitleOfCourtesy</th>
+			<th>BirthDate</th>
+			<th>HireDate</th>
+			<th>Address</th>
+			<th>City</th>
+			<th>Region</th>
+			<th>PostalCode</th>
+			<th>Country</th>
+			<th>HomePhone</th>
+			<th>Extension</th>
+			<th>#</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var e in ListOfEmployees)
+		{
+			<tr>
+				<th>@e.FirstName</th>
+				<th>@e.LastName</th>
+				<th>@e.Title</th>
+				<th>@e.TitleOfCourtesy</th>
+				<th>@e.BirthDate</th>
+				<th>@e.HireDate</th>
+				<th>@e.Address</th>
+				<th>@e.City</th>
+				<th>@e.Region</th>
+				<th>@e.PostalCode</th>
+				<th>@e.Country</th>
+				<th>@e.HomePhone</th>
+				<th>@e.Extension</th>
+				<td class="btn-group-sm">
+					<a href="/employees/edit/@e.EmployeeId" class="btn btn-outline-primary">Edit</a>
+					<button class="btn btn-outline-danger" @onclick="()=>DeleteData(e)">Delete</button>
+					@*we can use lambda to pass the argument from foreach to the method*@
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+@code {
+	[Parameter]
+	public int? CurrentPage { get; set; }
+	[Parameter]
+	public double TotalPages { get; set; }
+	[Parameter]
+	public List<Employee> ListOfEmployees { get; set; }
+
+	private async Task DeleteData(Employee employee)
+	{
+		try
+		{
+			var jsConfirmation = await JavaScript.InvokeAsync<bool>("confirm", $"Delete Employee {employee.FirstName} {employee.LastName} ?");
+			//above is the javascript interop
+			if (jsConfirmation)
+			{
+				await repository.DeleteEmployee(employee);
+				navigationManager.NavigateTo("/Employees/list/");
+			}
+		}
+		catch (DbUpdateConcurrencyException e)
+		{ throw e;}
+	}
+}

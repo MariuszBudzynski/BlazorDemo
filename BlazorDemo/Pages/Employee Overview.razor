@@ -1,0 +1,74 @@
+﻿@page "/"
+@page "/Employees/list/{CurrentPage:int?}"
+
+@inject IEmployeeRepository employeeRepository;
+@inject NavigationManager navManager
+@inject StateContainer stateContainer
+
+<PageTitle>Employee</PageTitle>
+
+<h1>Employees</h1>
+
+@if (!ListOfEmployees.Any())
+{
+	<div>Loading...</div>
+}
+else
+{
+	<EmployeeView
+		CurrentPage="@CurrentPage"
+		TotalPages="@TotalPages"
+		ListOfEmployees="@ListOfEmployees">
+	</EmployeeView>
+}
+
+@code
+{
+	List<Employee> ListOfEmployees { get; set; } = new();
+
+	[Parameter]
+	public int? CurrentPage { get; set; }
+	[Parameter]
+	public double TotalPages { get; set; }
+
+	private const int itemsPerPage = 4;
+
+
+	protected override async Task OnParametersSetAsync()
+	{
+		var employeesList = await Task
+			.FromResult(employeeRepository
+			.GetAllEmployees());
+
+		var employeesCount = employeesList.Count();
+
+		TotalPages = employeesCount == 0 ? 1
+		: Math.Ceiling((double)employeesCount / (double)itemsPerPage);
+
+		if (CurrentPage is null || (CurrentPage <= 0))
+		{
+			navManager.NavigateTo("/Employees/list/1");
+			return;
+		}
+
+		if (CurrentPage > TotalPages)
+		{
+			navManager.NavigateTo($"/Employees/list/{TotalPages}");
+			return;
+		}
+
+		stateContainer.EmployeeOverviewPage = CurrentPage.Value;
+
+		var itemsToSkip = (CurrentPage.Value - 1) * itemsPerPage;
+
+		var employees = employeesList
+			.OrderBy(e=>e.FirstName)
+			.Skip(itemsToSkip)
+			.Take(itemsPerPage);
+
+		ListOfEmployees.Clear();
+		ListOfEmployees.AddRange(employees);
+	}
+}
+
+

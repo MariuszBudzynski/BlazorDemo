@@ -1,0 +1,81 @@
+﻿@page "/employees/edit/{employeeId:int}"
+@inject IEmployeeRepository repository
+@inject IModdelMapper mapper
+@inject NavigationManager naviManager
+@inject StateContainer stateContainer
+
+<PageTitle> Edit Employee</PageTitle>
+<h1>Edit Employee</h1>
+
+@if (Employee is null)
+{
+	<div class="alert alert-danger">Employee with Id @EmployeeId was not found</div>
+}
+else
+{
+	<EmployeeForm
+		Employee="@Employee"
+		TitleOfCourtesyList="TitleOfCourtesyList"
+		TitleList="TitleList"
+		EmployeeId="EmployeeId"
+		IsEdit="true"
+		OnSubmit="@FormSubmit"
+		CancelButton="NavigateToOveriewPage" />
+}
+
+@if (ErrorMessage is not null)
+{
+	<br/>
+	<div class="alert alert-danger">@ErrorMessage</div>
+}
+
+@code {
+	[Parameter]
+	public int EmployeeId { get; set; }
+	private EmployeeModel? Employee { get; set; }
+	private List<string>? TitleOfCourtesyList { get; set; }
+	private List<string>? TitleList { get; set; }
+	private string? ErrorMessage { get; set; }
+
+
+	protected override async Task OnParametersSetAsync()
+	{
+		var employeesList = (await Task
+					.FromResult(repository
+					.GetAllEmployees())).ToList();
+
+		TitleOfCourtesyList = await Task.FromResult(repository.GetDistinctTitles());
+		TitleList = await Task.FromResult(repository.GetDistinctTitlesOfCourtesy());
+
+		var employee = (await Task.FromResult(employeesList)).FirstOrDefault(e => e.EmployeeId == EmployeeId);
+
+		Employee = mapper.EmployeetoModelEE(employee);
+
+	}
+
+	private async Task FormSubmit(bool isValid)
+	{
+		if (Employee is null || !isValid)
+		{
+			ErrorMessage = null;
+			return;
+		}
+		try
+		{
+			var mappedEE = await Task.FromResult(mapper.ModelEEtoEmployee(Employee));
+			await repository.UpdateEmployee(mappedEE);
+			NavigateToOveriewPage();
+		}
+		catch
+		(Exception e)
+		{
+			ErrorMessage = $"Error saving data: {e.Message}";
+		}
+	}
+
+	private void NavigateToOveriewPage()
+	{
+		naviManager.NavigateTo($"/Employees/list/{stateContainer.EmployeeOverviewPage}");
+	}
+
+}
