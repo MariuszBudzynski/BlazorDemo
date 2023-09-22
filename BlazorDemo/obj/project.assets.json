@@ -1063,27 +1063,10 @@
           }
         }
       },
-      "MVC_Demo/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v6.0",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore": "7.0.10"
-        },
-        "compile": {
-          "bin/placeholder/MVC_Demo.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/MVC_Demo.dll": {}
-        },
-        "frameworkReferences": [
-          "Microsoft.AspNetCore.App"
-        ]
-      },
       "NWdatabase/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v6.0",
         "dependencies": {
-          "MVC_Demo": "1.0.0",
           "Microsoft.EntityFrameworkCore": "7.0.10",
           "Microsoft.EntityFrameworkCore.SqlServer": "7.0.10"
         },
@@ -3279,11 +3262,6 @@
         "version.txt"
       ]
     },
-    "MVC_Demo/1.0.0": {
-      "type": "project",
-      "path": "../../../MVC_Demo/MVC_Demo/MVC_Demo/MVC_Demo.csproj",
-      "msbuildProject": "../../../MVC_Demo/MVC_Demo/MVC_Demo/MVC_Demo.csproj"
-    },
     "NWdatabase/1.0.0": {
       "type": "project",
       "path": "../../../NWdatabase/NWdatabase/NWdatabase/NWdatabase.csproj",
@@ -3368,7 +3346,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.400\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.401\\RuntimeIdentifierGraph.json"
       }
     }
   }
