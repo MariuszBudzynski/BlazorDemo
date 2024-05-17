@@ -7,7 +7,7 @@ I wrote this application to learn Blazor. It requires external database access t
 * CSS
 * Blazor State Containers
 * Blazor Server Side
-* DI Injection
+* Dependency Injection
 * Razor Pages
 * SQL Server
 * EF Core
